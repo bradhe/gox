@@ -1,0 +1,9 @@
+#
+# Development artifacts
+#
+*.sw[onp]
+
+#
+# Build artifacts
+#
+
