@@ -41,4 +41,24 @@ func TestBuffer(t *testing.T) {
 		assert.Equal(t, n, 5)
 		assert.Equal(t, string(b[:]), "Hello")
 	})
+
+	t.Run("allows content to be overwritten", func(t *testing.T) {
+		buf := NewBuffer([]byte("Hello, world!"))
+
+		n, err := buf.Seek(0, io.SeekStart)
+		assert.NoError(t, err)
+		assert.Equal(t, n, int64(0))
+
+		_, err = buf.Write([]byte("Goodbye, my friend!"))
+		assert.NoError(t, err)
+
+		n, err = buf.Seek(0, io.SeekStart)
+		assert.NoError(t, err)
+		assert.Equal(t, n, int64(0))
+
+		var b [7]byte
+		_, err = buf.Read(b[:])
+		assert.NoError(t, err)
+		assert.Equal(t, string(b[:]), "Goodbye")
+	})
 }

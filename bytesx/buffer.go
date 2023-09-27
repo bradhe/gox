@@ -1,6 +1,7 @@
 package bytesx
 
 import (
+	"bytes"
 	"errors"
 	"io"
 )
@@ -20,8 +21,25 @@ func (ws *Buffer) Read(b []byte) (int, error) {
 }
 
 func (ws *Buffer) Write(b []byte) (int, error) {
-	ws.buf = append(ws.buf, b...)
-	return len(b), nil
+	n := len(b)
+	diff := ws.i - int64(len(ws.buf))
+
+	var tail []byte
+	if n+int(ws.i) < len(ws.buf) {
+		tail = ws.buf[n+int(ws.i):]
+	}
+
+	if diff > 0 {
+		ws.buf = append(ws.buf, append(bytes.Repeat([]byte{0o0}, int(diff)), b...)...)
+		ws.buf = append(ws.buf, tail...)
+	} else {
+		ws.buf = append(ws.buf[:ws.i], b...)
+		ws.buf = append(ws.buf, tail...)
+	}
+
+	ws.i += int64(n)
+
+	return n, nil
 }
 
 // Copied from Go stdlib bytes.Reader
